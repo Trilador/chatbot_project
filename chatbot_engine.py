@@ -1,5 +1,17 @@
 from utility_modules.file_operations import *
 from utility_modules.code_generations import *
+import openai
+
+# Configuration Setup:##
+# Set up the OpenAI API
+openai.api_key = os.environ.get("OPENAI_API_KEY")
+if not openai.api_key:
+    raise ValueError("Please set the OPENAI_API_KEY environment variable.")
+# Set up the Wikipedia API
+#wiki_wiki = wikipediaapi.Wikipedia('ttriladorr@gmail.com/0.1')
+# Set default directory for access 
+DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
+
 
 def chatbot_response(query):
     if "list files" in query:
@@ -33,7 +45,9 @@ def chatbot_response(query):
         code = query.split("for")[-1].strip()
         return analyze_python_code_ast(code)
     else:
-        return "Sorry, I couldn't understand that query."
+        # Forward the query to OpenAI for a natural language response
+        response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
+        return response.choices[0].text.strip()
 
 def main():
     while True:
