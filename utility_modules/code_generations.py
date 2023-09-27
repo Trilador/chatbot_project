@@ -11,22 +11,22 @@ def get_main_verb_from_query(query):
     return next((token for token in doc if "VERB" in token.pos_), None)
 
 def natural_language_to_code(query):
-    doc = nlp(query)
-    main_verb = get_main_verb_from_query(query)
-    if not main_verb:
-        return "Sorry, I couldn't generate a code snippet for that query."
-
-    verb_to_function_map = {
-        "open": generate_open_file_code,
-        "write": generate_write_file_code,
-        "loop": generate_loop_code,
+    # Simple patterns for code generation
+    patterns = {
+        "function to add two numbers": "def add(a, b):\n    return a + b",
+        "function to subtract two numbers": "def subtract(a, b):\n    return a - b",
+        "function to multiply two numbers": "def multiply(a, b):\n    return a * b",
+        "function to divide two numbers": "def divide(a, b):\n    if b != 0:\n        return a / b\n    else:\n        return 'Division by zero error'"
     }
+    
+    # Check if the query matches any pattern
+    for pattern, code in patterns.items():
+        if pattern in query:
+            return code
+    
+    # If no match is found
+    return "Sorry, I couldn't generate code for that query."
 
-    generate_code_func = verb_to_function_map.get(main_verb.lemma_)
-    if generate_code_func:
-        return generate_code_func(query)
-    else:
-        return "Sorry, I couldn't generate a code snippet for that query."
 
 def generate_loop_code(query):
     if "for" in query:

@@ -9,6 +9,32 @@ def list_files(directory=DEFAULT_DIRECTORY):
     except Exception as e:
         return f"Error listing files: {str(e)}"
 
+def list_directories(directory=DEFAULT_DIRECTORY):
+    try:
+        return [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
+    except Exception as e:
+        return f"Error listing directories: {str(e)}"
+
+def create_directory(directory_name, parent_directory=DEFAULT_DIRECTORY):
+    dir_path = os.path.join(parent_directory, directory_name)
+    if os.path.exists(dir_path):
+        return f"Error: Directory {dir_path} already exists."
+    try:
+        os.mkdir(dir_path)
+        return f"Successfully created directory: {dir_path}"
+    except Exception as e:
+        return f"Error creating directory {dir_path}: {str(e)}"
+
+def delete_directory(directory_name, parent_directory=DEFAULT_DIRECTORY):
+    dir_path = os.path.join(parent_directory, directory_name)
+    if not os.path.exists(dir_path):
+        return f"Error: Directory {dir_path} does not exist."
+    try:
+        os.rmdir(dir_path)
+        return f"Successfully deleted directory: {dir_path}"
+    except Exception as e:
+        return f"Error deleting directory {dir_path}: {str(e)}"
+
 def display_file_content(filename, directory=DEFAULT_DIRECTORY):
     filepath = os.path.join(directory, filename)
     if not os.path.exists(filepath):
@@ -19,23 +45,6 @@ def display_file_content(filename, directory=DEFAULT_DIRECTORY):
         return content
     except Exception as e:
         return f"Error reading from {filepath}: {str(e)}"
-
-def save_to_file(data, filename, directory=DEFAULT_DIRECTORY):
-    filepath = os.path.join(directory, filename)
-    with open(filepath, 'w') as file:
-        json.dump(data, file)
-
-def load_from_file(filename, directory=DEFAULT_DIRECTORY):
-    filepath = os.path.join(directory, filename)
-    if not os.path.exists(filepath):
-        return {}
-    with open(filepath, 'r') as file:
-        return json.load(file)
-
-def append_to_file(data, filename, directory=DEFAULT_DIRECTORY):
-    existing_data = load_from_file(filename, directory)
-    existing_data.update(data)
-    save_to_file(existing_data, filename, directory)
 
 def save_file_content(filename, content, directory=DEFAULT_DIRECTORY):
     filepath = os.path.join(directory, filename)
