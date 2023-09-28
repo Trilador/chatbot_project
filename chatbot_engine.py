@@ -42,7 +42,9 @@ def chatbot_response(query: str) -> str:
     if len(context) > 5:  # Keep the last 5 interactions for context
         context.pop(0)
 
-    # File operations
+    # Enhanced File operations
+    if any(phrase in query for phrase in ["show files", "list files", "display files"]):
+        return list_files()
     if "list files" in query:
         return list_files()
     elif "list directories" in query:
@@ -64,9 +66,8 @@ def chatbot_response(query: str) -> str:
     elif "search content" in query:
         content = query.split("for")[-1].strip()
         return search_file_content(content)
-
-    # Code generation and analysis
-    elif "generate code" in query:
+    # Enhanced Code generation and analysis
+    if "write code" in query or "generate code" in query:
         return natural_language_to_code(query)
     elif "provide feedback" in query:
         code = query.split("for")[-1].strip()
@@ -79,7 +80,6 @@ def chatbot_response(query: str) -> str:
         code = query.split("for")[-1].strip()
         return analyze_python_code_ast(code)
 
-    # Wikipedia summary and web browsing
     elif "wikipedia summary" in query:
         return fetch_wikipedia_summary(query)
     elif "search documentation" in query:
@@ -87,14 +87,25 @@ def chatbot_response(query: str) -> str:
         return search_python_documentation(topic)
 
     else:
+        return _extracted_from_chatbot_response_52(context, query)
+
+
+# TODO Rename this here and in `chatbot_response`
+def _extracted_from_chatbot_response_52(context, query):
+    else:
         full_prompt = "\n".join(context + [query])
         response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=TOKEN_LIMIT)
         response_text = response.choices[0].text.strip()
+
+        # Response Filtering
+        if len(response_text.split()) < 3 or "I think" in response_text or "I believe" in response_text:
+            response_text = "I'm sorry, I couldn't generate a relevant response. Can you please rephrase or provide more details?"
 
         # Adjusted condition
         if len(response_text.split()) > TOKEN_LIMIT:
             return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
         return response_text
+
 
 def main() -> None:
     while True:
