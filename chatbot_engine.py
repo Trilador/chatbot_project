@@ -95,20 +95,12 @@ def chatbot_response(query):  # sourcery skip: low-code-quality
         return search_python_documentation(topic)
     
     else:
-        # Forward the query to OpenAI for a natural language response
-        response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
+        # Forward the query to OpenAI with context
+        full_prompt = "\n".join(context + [query])
+        token_limit = get_token_limit(full_prompt)
+        response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=token_limit)
         response_text = response.choices[0].text.strip()
-        
-        token_limit = get_token_limit(query)
-    response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=token_limit)
-    response_text = response.choices[0].text.strip()
     
-# Forward the query to OpenAI with context
-    full_prompt = "\n".join(context + [query])
-    token_limit = get_token_limit(full_prompt)
-    response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=token_limit)
-    response_text = response.choices[0].text.strip()
-
     # Check if the response is too verbose or unclear
     if "My response seems too long." not in response_text and len(response_text.split()) > (token_limit // 3):
         return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
