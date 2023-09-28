@@ -20,8 +20,16 @@ def natural_language_to_code(query: str) -> str:
     if query.lower() in non_code_responses:
         return non_code_responses[query.lower()]
 
-    # Preprocess the user's query
-    refined_query = f"Write a Python code snippet to {query}"
+    # Identify the intent of the query
+    intent = get_intent(query)
+    
+    # Generate code based on intent
+    if intent == "code_generation":
+        refined_query = f"Write a Python code snippet to {query}"
+    elif intent == "file_operation":
+        refined_query = f"How to perform the file operation: {query} in Python?"
+    else:
+        refined_query = query
     
     # Generate code using OpenAI
     try:
@@ -49,6 +57,16 @@ def natural_language_to_code(query: str) -> str:
         return f"Generated code has a syntax error: {str(e)}"
     
     return formatted_code
+
+def get_intent(query):
+    # This is a basic intent identification. A more sophisticated approach can be used.
+    if "function" in query or "loop" in query or "list comprehension" in query:
+        return "code_generation"
+    elif "file location" in query or "open" in query or "read" in query:
+        return "file_operation"
+    else:
+        return "general"
+
 
 def generate_loop_code(query):
     if "for" in query:
