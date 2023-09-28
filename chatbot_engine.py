@@ -2,7 +2,7 @@ import os
 import openai
 from utility_modules.file_operations import *
 from utility_modules.code_generations import *
-from utility_modules.web_operations import fetch_wikipedia_summary
+from utility_modules.web_operations import fetch_wikipedia_summary, search_python_documentation
 
 # Set up the OpenAI API
 openai.api_key = os.environ.get("OPENAI_API_KEY")
@@ -35,6 +35,7 @@ def chatbot_response(query):
         parts = query.split("for")
         content = parts[-1].strip()
         return search_file_content(content)
+    
     # Code generation and analysis
     elif "generate code" in query:
         return natural_language_to_code(query)
@@ -48,9 +49,14 @@ def chatbot_response(query):
     elif "analyze code" in query:
         code = query.split("for")[-1].strip()
         return analyze_python_code_ast(code)
-    # Wikipedia summary
+    
+    # Wikipedia summary and web browsing
     elif "wikipedia summary" in query:
         return fetch_wikipedia_summary(query)
+    elif "search documentation" in query:
+        topic = query.split("for")[-1].strip()
+        return search_python_documentation(topic)
+    
     else:
         # Forward the query to OpenAI for a natural language response
         response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
