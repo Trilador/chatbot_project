@@ -15,7 +15,7 @@ DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
 context = []
 
 def store_feedback(query, response, rating):
-    with open("feedback_data.txt", "a") as f:
+    with open("feedback_data.txt", "a", encoding="utf-8") as f:  # Added encoding
         f.write(f"Query: {query}\n")
         f.write(f"Response: {response}\n")
         f.write(f"Rating: {rating}\n")
@@ -108,9 +108,9 @@ def chatbot_response(query):  # sourcery skip: low-code-quality
     token_limit = get_token_limit(full_prompt)
     response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=token_limit)
     response_text = response.choices[0].text.strip()
-    
+
     # Check if the response is too verbose or unclear
-    if len(response_text.split()) > (token_limit // 3):
+    if "My response seems too long." not in response_text and len(response_text.split()) > (token_limit // 3):
         return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
     return response_text
 
