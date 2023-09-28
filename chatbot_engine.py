@@ -17,6 +17,9 @@ from utility_modules.code_generations import (
     analyze_python_code_ast,
 )
 from utility_modules.web_operations import fetch_wikipedia_summary, search_python_documentation
+from code_db.advanced_constructs import PYTHON_CODE_DB as ADVANCED_DB
+from code_db.basic_constructs import PYTHON_CODE_DB as BASIC_DB
+from code_db.python_modules import PYTHON_CODE_DB as MODULES_DB
 
 # Set up the OpenAI API
 openai.api_key = os.environ.get("OPENAI_API_KEY")
@@ -36,11 +39,28 @@ def store_feedback(query: str, response: str, rating: Union[int, str]) -> None:
         f.write(f"Rating: {rating}\\n")
         f.write("-" * 50 + "\\n")
 
+def check_code_db(query: str) -> Union[str, None]:
+    return next(
+        (
+            f"{description}\n\nCode:\n{code}"
+            for topic, (code, description) in {
+                **ADVANCED_DB,
+                **BASIC_DB,
+                **MODULES_DB,
+            }.items()
+            if topic in query
+        ),
+        None,
+    )
+
 def chatbot_response(query: str) -> str:
     global context
     context.append(query)
     if len(context) > 5:  # Keep the last 5 interactions for context
         context.pop(0)
+
+    if code_response := check_code_db(query):
+        return code_response
 
     # Enhanced File operations
     if any(phrase in query for phrase in ["show files", "list files", "display files"]):
@@ -64,7 +84,7 @@ def chatbot_response(query: str) -> str:
     elif "search content" in query:
         content = query.split("for")[-1].strip()
         return search_file_content(content)
-    
+
     # Enhanced Code generation and analysis
     if "write code" in query or "generate code" in query:
         return natural_language_to_code(query)
