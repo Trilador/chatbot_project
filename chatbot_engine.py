@@ -101,8 +101,8 @@ def chatbot_response(query):  # sourcery skip: low-code-quality
         response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=token_limit)
         response_text = response.choices[0].text.strip()
     
-    # Check if the response is too verbose or unclear
-    if "My response seems too long." not in response_text and len(response_text.split()) > (token_limit // 3):
+    # Adjusted condition
+    if "My response seems too long." not in response_text and len(response_text.split()) > (token_limit // 2):
         return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
     return response_text
 
