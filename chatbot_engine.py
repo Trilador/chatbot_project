@@ -39,7 +39,7 @@ context: List[str] = []
 CONTEXT_SIZE = 10
 
 
-
+print("Welcome to the Python Chatbot! I'm here to help you with your Python programming questions.")
 def check_code_db(query: str) -> Union[str, None]:
     return next(
         (
@@ -94,12 +94,13 @@ def handle_openai_response(query: str, context: List[str]) -> str:
         
 
 def chatbot_response(query: str) -> str:
+
     global context
     context.append(query)
+
     if len(context) > CONTEXT_SIZE:
         context.pop(0)
-
-
+ 
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         return handle_file_reading_request(query)
@@ -149,38 +150,39 @@ def chatbot_response(query: str) -> str:
     elif "search documentation" in query:
         topic = query.split("for")[-1].strip()
         return search_python_documentation(topic)
-    
+
     # If no other conditions are met, use Dialogflow for general chatbot interactions
-    print("Attempting to get response from Dialogflow...")  # Added print statement
+
     if dialogflow_response := get_dialogflow_response(query):
         return dialogflow_response
 
     # Use Cloud Natural Language API for sentiment analysis
-    print("Attempting to understand your sentiment...")  # Added print statement
     sentiment_score, sentiment_magnitude = analyze_text(query)
     if  sentiment_score > 0.7:
         return "I'm glad to hear that!"
     elif sentiment_score < -0.7:
         return "I'm sorry to hear that. How can I assist you further?"
 
-# If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
+    #If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
     print("Attempting to get response help from OpenAI...")  # Added print statement
     return handle_openai_response(query, context)
 
 
 
 def main() -> None:
-        while True:
-            query = input("You: ")
-            if query.lower() in ["exit", "quit", "bye"]:
-                break
-
-
+    while True:
+        query = input("You: ")
+        if query.lower() in ["exit", "quit", "bye"]:
+            break
+        response = chatbot_response(query)
+        print(f"Bot: {response}")
+        
         # Feedback mechanism
         rating = input("Rate the response (1-5, 5 being very helpful, or 'skip' to skip): ")
         if rating.isdigit() and 1 <= int(rating) <= 5:
-            Wstore_feedback(query, response, rating)
+            store_feedback(query, response, rating)
         elif rating.lower() != 'skip':
             print("Invalid rating. Skipping feedback for this response.")
+
 if __name__ == "__main__":
     main()
