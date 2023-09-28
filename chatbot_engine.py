@@ -87,6 +87,7 @@ def chatbot_response(query: str) -> str:
         return _extracted_from_chatbot_response_52(context, query)
 
 def _extracted_from_chatbot_response_52(context, query):
+    
     # Using the entire conversation history for context
     full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
     try:
@@ -107,8 +108,11 @@ def _extracted_from_chatbot_response_52(context, query):
         return f"Error: {str(e)}. I'm having some issues right now. Try again later."
     
     # Enhanced Response Filtering
-    if response_text in context:
+    last_user_query = context[-2] if len(context) > 1 else None
+    last_bot_response = context[-1] if len(context) > 1 else None
+    if response_text == last_bot_response and query == last_user_query:
         response_text = "I've already provided that response. Can you please rephrase or ask a different question?"
+
 
     # Adjusted condition
     if len(response_text.split()) > TOKEN_LIMIT:
