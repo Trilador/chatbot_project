@@ -51,23 +51,37 @@ def handle_file_reading_request(query: str) -> str:
         return read_file_content(file_path)
 
 def handle_openai_response(query: str, context: List[str]) -> str:
-    full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
+    full_prompt = "\\n".join(context[-4:] + [f"User: {query}\\nBot:"])  # Use the last 4 interactions for context
     try:
         response = openai.Completion.create(
             engine="davinci",
             prompt=full_prompt,
-            temperature=0.7,
+            temperature=0.5,  # Reduce randomness
             max_tokens=TOKEN_LIMIT,
             top_p=1,
-            frequency_penalty=-0.25,
-            presence_penalty=-0.25,
+            frequency_penalty=0,  # Adjust penalties
+            presence_penalty=0,
             stop=["\\n", "User:", "Bot:"]
         )
-        return response.choices[0].text.strip()
+        response_text = response.choices[0].text.strip()
     except openai.error.OpenAIError as e:
         return f"OpenAI Error: {str(e)}"
     except Exception as e:
         return f"Error: {str(e)}"
+
+    # Enhanced Response Filtering
+    last_user_query = context[-2] if len(context) > 1 else None
+    last_bot_response = context[-1] if len(context) > 1 else None
+    if response_text == last_bot_response and query == last_user_query:
+        response_text = "I've already provided that response. Can you please rephrase or ask a different question?"
+    elif response_text == query:
+        response_text = "I'm not sure how to respond to that. Can you provide more context or rephrase your question?"
+
+    # Adjusted condition
+    if len(response_text.split()) > TOKEN_LIMIT:
+        response_text = "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
+
+    return response_text
 def chatbot_response(query: str) -> str:
     global context
     context.append(query)
