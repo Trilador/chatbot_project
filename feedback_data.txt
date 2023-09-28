@@ -46,3 +46,11 @@ But if not, just do your job
 and beautify my code on my behalf
 Rating: 1
 --------------------------------------------------
+Query: how is your day?
+Response: None
+Rating: 1
+--------------------------------------------------
+Query: why
+Response: None
+Rating: 1
+--------------------------------------------------

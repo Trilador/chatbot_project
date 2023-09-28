@@ -64,6 +64,7 @@ def chatbot_response(query: str) -> str:
     elif "search content" in query:
         content = query.split("for")[-1].strip()
         return search_file_content(content)
+    
     # Enhanced Code generation and analysis
     if "write code" in query or "generate code" in query:
         return natural_language_to_code(query)
@@ -93,11 +94,14 @@ def _extracted_from_chatbot_response_52(context, query):
     # Response Filtering
     if len(response_text.split()) < 3 or "I think" in response_text or "I believe" in response_text:
         response_text = "I'm sorry, I couldn't generate a relevant response. Can you please rephrase or provide more details?"
+    # Enhanced Response Filtering
+    if response_text in context:
+        response_text = "I've already provided that response. Can you please rephrase or ask a different question?"
+        return response_text
 
     # Adjusted condition
     if len(response_text.split()) > TOKEN_LIMIT:
-        return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
-    return response_text
+        return response_text
 
 def main() -> None:
     while True:
