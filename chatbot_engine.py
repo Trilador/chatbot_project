@@ -33,15 +33,17 @@ TOKEN_LIMIT = 150
 context: List[str] = []
 CONTEXT_SIZE = 10
 
-def store_feedback(query: str, response: str, rating: Union[int, str]) -> None:
-    # ... [No changes here]
+def check_code_db(query: str) -> Union[str, None]:
+    # ... [Function implementation here]
 
+    
+    
 def check_code_db(query: str) -> Union[str, None]:
     # ... [No changes here]
 
 def handle_file_reading_request(query: str) -> str:
     file_path = query.split('"')[1]
-    return read_file_content(file_path)
+        return read_file_content(file_path)
 
 def handle_openai_response(query: str, context: List[str]) -> str:
     full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
