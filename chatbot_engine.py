@@ -31,15 +31,25 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 if not openai.api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
 
-DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
+DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python"
 TOKEN_LIMIT = 150
 
 # Contextual Understanding
 context: List[str] = []
 CONTEXT_SIZE = 10
 
+def update_context(user_query: str, bot_response: str) -> None:
+    
+    print("Welcome! I'm here to help you with your Python programming questions.")
+    """
+    Update the context with the latest user query and bot response.
+    """
+    global context
+    context.append(f"User: {user_query}")
+    context.append(f"Bot: {bot_response}")
+    while len(context) > CONTEXT_SIZE:
+        context.pop(0)
 
-print("Welcome to the Python Chatbot! I'm here to help you with your Python programming questions.")
 def check_code_db(query: str) -> Union[str, None]:
     return next(
         (
@@ -94,78 +104,43 @@ def handle_openai_response(query: str, context: List[str]) -> str:
         
 
 def chatbot_response(query: str) -> str:
-
+    if not query.strip():
+        return "It seems you didn't provide any input. Please ask a question or provide a command."
     global context
     context.append(query)
 
     if len(context) > CONTEXT_SIZE:
         context.pop(0)
- 
+
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         return handle_file_reading_request(query)
 
-    # Check the code database
-    if code_response := check_code_db(query):
-        return code_response
 
-    # Enhanced File operations
-    if any(phrase in query for phrase in ["show files", "list files", "display files"]):
-        return list_files()
-    if "list directories" in query:
-        return list_directories()
-    elif "create directory" in query:
-        directory_name = query.split("named")[-1].strip()
-        return create_directory(directory_name)
-    elif "delete directory" in query:
-        directory_name = query.split("named")[-1].strip()
-        return delete_directory(directory_name)
-    elif "display content" in query:
-        filename = query.split("of")[-1].strip()
-        return display_file_content(filename)
-    elif "save content" in query:
-        parts = query.split("of")
-        filename = parts[-2].strip()
-        content = parts[-1].strip()
-        return save_file_content(filename, content)
-    elif "search content" in query:
-        content = query.split("for")[-1].strip()
-        return search_file_content(content)
-
-    # Enhanced Code generation and analysis
-    if "write code" in query or "generate code" in query:
-        return natural_language_to_code(query)
-    elif "provide feedback" in query:
-        code = query.split("for")[-1].strip()
-        return provide_code_feedback(code)
-    elif "correct code" in query:
-        code = query.split("for")[-1].strip()
-        feedback, corrected_code = interactive_code_correction(code)
-        return feedback
-    elif "analyze code" in query:
-        code = query.split("for")[-1].strip()
-        return analyze_python_code_ast(code)
-    elif "wiki" in query:
-        return fetch_wikipedia_summary(query)
-    elif "search documentation" in query:
-        topic = query.split("for")[-1].strip()
-        return search_python_documentation(topic)
-
-    # If no other conditions are met, use Dialogflow for general chatbot interactions
+# If no other conditions are met, use Dialogflow for general chatbot interactions
 
     if dialogflow_response := get_dialogflow_response(query):
         return dialogflow_response
 
     # Use Cloud Natural Language API for sentiment analysis
-    sentiment_score, sentiment_magnitude = analyze_text(query)
-    if  sentiment_score > 0.7:
-        return "I'm glad to hear that!"
-    elif sentiment_score < -0.7:
-        return "I'm sorry to hear that. How can I assist you further?"
+    try:
+        sentiment_score, sentiment_magnitude = analyze_text(query)
+        if  sentiment_score > 0.7:
+            return "I'm glad to hear that!"
+        elif sentiment_score < -0.7:
+            return "I'm sorry to hear that. How can I assist you further?"
+    except Exception as e:
+        return f"Error analyzing sentiment: {str(e)}"
 
     #If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
-    print("Attempting to get response help from OpenAI...")  # Added print statement
-    return handle_openai_response(query, context)
+    
+def handle_openai_response(query: str, context: List[str]) -> str:
+    # ... [Previous logic]
+        except openai.error.OpenAIError as e:
+        if "Input text not set." in str(e):
+                return "OpenAI Error: It seems there was an issue with the input provided to OpenAI. Please try again."
+            return f"OpenAI Error: {str(e)}"
+    except Exception as e: f"Error with OpenAI response: {str(e)}"
 
 
 
