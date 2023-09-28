@@ -144,17 +144,19 @@ def chatbot_response(query: str) -> str:
     elif "analyze code" in query:
         code = query.split("for")[-1].strip()
         return analyze_python_code_ast(code)
-    elif "wikipedia summary" in query:
+    elif "wiki" in query:
         return fetch_wikipedia_summary(query)
     elif "search documentation" in query:
         topic = query.split("for")[-1].strip()
         return search_python_documentation(topic)
     
     # If no other conditions are met, use Dialogflow for general chatbot interactions
+    print("Attempting to get response from Dialogflow...")  # Added print statement
     if dialogflow_response := get_dialogflow_response(query):
         return dialogflow_response
 
     # Use Cloud Natural Language API for sentiment analysis
+    print("Attempting to understand your sentiment...")  # Added print statement
     sentiment_score, sentiment_magnitude = analyze_text(query)
     if  sentiment_score > 0.7:
         return "I'm glad to hear that!"
@@ -162,6 +164,7 @@ def chatbot_response(query: str) -> str:
         return "I'm sorry to hear that. How can I assist you further?"
 
 # If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
+    print("Attempting to get response help from OpenAI...")  # Added print statement
     return handle_openai_response(query, context)
 
 
