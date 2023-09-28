@@ -125,7 +125,7 @@ def chatbot_response(query: str) -> str:
         return search_python_documentation(topic)
 
     # If no other conditions are met, use OpenAI API
-    return _extracted_from_chatbot_response_52(context, query)
+    return handle_openai_response(query, context)
     
 def main() -> None:
     while True:
