@@ -53,14 +53,35 @@ def check_code_db(query: str) -> Union[str, None]:
         None,
     )
 
+def read_file_content(file_path: str) -> str:
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            return file.read()
+    except Exception as e:
+        return f"Error reading file: {e}"
+
 def chatbot_response(query: str) -> str:
     global context
     context.append(query)
     if len(context) > 5:  # Keep the last 5 interactions for context
         context.pop(0)
 
+    # Check for file reading requests
+    if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
+        file_path = query.split('"')[1]
+        return read_file_content(file_path)
+
     if code_response := check_code_db(query):
         return code_response
+
+    # Generate response using OpenAI API
+    # ... [Rest of the OpenAI API call]
+
+    # If the generated response is too similar to the user's query, provide a default response
+    if response.strip() == query.strip():
+        response = "I'm sorry, I didn't understand that. Can you please rephrase or provide more details?"
+
+
 
     # Enhanced File operations
     if any(phrase in query for phrase in ["show files", "list files", "display files"]):
