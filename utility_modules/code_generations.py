@@ -21,8 +21,12 @@ def natural_language_to_code(query: str) -> str:
         refined_query = f"Write a Python loop to {query}"
     elif main_verb and main_verb.lemma_ in ["check", "validate"]:
         refined_query = f"Write a Python conditional to {query}"
-    else:
+    elif main_verb and main_verb.lemma_ in ["function", "method"]:
         refined_query = f"Write a Python function to {query}"
+    elif main_verb and main_verb.lemma_ in ["import", "use"]:
+        refined_query = f"Write Python code to {query}"
+    else:
+        refined_query = f"Write Python code for: {query}"
     
     # Generate code using OpenAI
     try:
