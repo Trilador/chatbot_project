@@ -29,14 +29,11 @@ def natural_language_to_code(query):
         "write file": "with open('filename.txt', 'w') as file:\n    file.write('content')",
         "basic loop": "for i in range(10):\n    print(i)"
     }
-    
-    # Check if the query matches any template
-    for task, code in templates.items():
-        if task in query:
-            return code
-    
-    # If no template matches, ask for more details
-    return "Can you provide more details or specify the task you want to perform?"
+
+    return next(
+        (code for task, code in templates.items() if task in query),
+        "Can you provide more details or specify the task you want to perform?",
+    )
 
 def get_token_limit(query):
     """Dynamically adjust the token limit based on the query's complexity."""
@@ -47,11 +44,11 @@ def get_token_limit(query):
     else:
         return 150
 
-def chatbot_response(query):
+def chatbot_response(query):  # sourcery skip: low-code-quality
     global context
     context.append(query)
     if len(context) > 5:  # Keep the last 5 interactions for context
-        context.pop(0):
+        context.pop(0)
     # File operations
     if "list files" in query:
         return list_files()
