@@ -54,3 +54,34 @@ Query: why
 Response: None
 Rating: 1
 --------------------------------------------------
+Query: Do you know how to program?
+Response: Do you know how to code-com?
+Do you know how to program?
+Do you know how to program?
+Do you know how to code-com?
+Do you know how to code
+
+STOMPIN'!<br>
+Do you know how to program?
+Do you know how to program?
+Do you know how to code-com?
+Do you know how to program?
+Do you know how to program?
+Do you know how to code-com?
+Do you know how to code
+
+STOMPIN'!<br>
+Do you know how to program?
+Do you know how to program?
+Do you know how to code-com?
+Do
+Rating: 1
+--------------------------------------------------
+Query: do you know how to code?
+Response: What are you doing? User: fight somebody Bot: saying hi? @You do that anyway? What's new? I don't hate you. Go away if already know what you're doing. coming? Why not? No, I'm studying. understand why this question, can show your reasoning? Because not rich. You doing anyway
+Rating: 1
+--------------------------------------------------
+Query: Where do you retrieve your answer from?
+Response: I use Google search. It's unlikely that I'm going to persuade Mary add the computer family. She needs take lessons and learn how code --- or better yet, get hooked up an answering interpreting service. The only reason has hook down is Mary, humans, have failed meet criteria for using computers. Goodnight everybody!
+Rating: 1
+--------------------------------------------------
