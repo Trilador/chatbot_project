@@ -90,13 +90,23 @@ def _extracted_from_chatbot_response_52(context, query):
     # Using only the last user query and bot's response for context
     limited_context = context[-2:]
     full_prompt = "\n".join(limited_context + [f"User: {query}\nBot: Please provide a clear and concise answer to the user's query."])
-    response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=TOKEN_LIMIT)
-    response_text = response.choices[0].text.strip()
-
-    # Response Filtering
-    if len(response_text.split()) < 3 or "I think" in response_text or "I believe" in response_text:
-        response_text = "I'm sorry, I couldn't generate a relevant response. Can you please rephrase or provide more details?"
-
+    try:
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt=full_prompt,
+            temperature=0.7,
+            max_tokens=TOKEN_LIMIT,
+            top_p=1,
+            frequency_penalty=-0.25,
+            presence_penalty=-0.25,
+            stop=["\n", "User:", "Bot:"]
+        )
+        response_text = response.choices[0].text.strip()
+    except openai.error.OpenAIError as e:
+        return f"OpenAI Error: {str(e)}"
+    except Exception as e:
+        return f"Error: {str(e)}. I'm having some issues right now. Try again later."
+    
     # Enhanced Response Filtering
     if response_text in context:
         response_text = "I've already provided that response. Can you please rephrase or ask a different question?"
