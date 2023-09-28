@@ -11,6 +11,13 @@ if not openai.api_key:
 
 DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
 
+def store_feedback(query, response, rating):
+    with open("feedback_data.txt", "a") as f:
+        f.write(f"Query: {query}\n")
+        f.write(f"Response: {response}\n")
+        f.write(f"Rating: {rating}\n")
+        f.write("-" * 50 + "\n")
+
 def chatbot_response(query):
     # File operations
     if "list files" in query:
@@ -74,6 +81,14 @@ def main():
             break
         response = chatbot_response(query)
         print(f"Bot: {response}")
+        
+        # Feedback mechanism
+        rating = input("Rate the response (1-5, 5 being very helpful, or 'skip' to skip): ")
+        if rating.isdigit() and 1 <= int(rating) <= 5:
+            store_feedback(query, response, rating)
+        elif rating.lower() != 'skip':
+            print("Invalid rating. Skipping feedback for this response.")
 
 if __name__ == "__main__":
     main()
+    
