@@ -31,10 +31,10 @@ context: List[str] = []
 
 def store_feedback(query: str, response: str, rating: Union[int, str]) -> None:
     with open("feedback_data.txt", "a", encoding="utf-8") as f:
-        f.write(f"Query: {query}\n")
-        f.write(f"Response: {response}\n")
-        f.write(f"Rating: {rating}\n")
-        f.write("-" * 50 + "\n")
+        f.write(f"Query: {query}\\n")
+        f.write(f"Response: {response}\\n")
+        f.write(f"Rating: {rating}\\n")
+        f.write("-" * 50 + "\\n")
 
 def chatbot_response(query: str) -> str:
     global context
@@ -88,7 +88,7 @@ def chatbot_response(query: str) -> str:
 
 def _extracted_from_chatbot_response_52(context, query):
     # Using the entire conversation history for context
-    full_prompt = "\n".join(context + [f"User: {query}\nBot:"])
+    full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
     try:
         response = openai.Completion.create(
             engine="davinci",
@@ -98,7 +98,7 @@ def _extracted_from_chatbot_response_52(context, query):
             top_p=1,
             frequency_penalty=-0.25,
             presence_penalty=-0.25,
-            stop=["\n", "User:", "Bot:"]
+            stop=["\\n", "User:", "Bot:"]
         )
         response_text = response.choices[0].text.strip()
     except openai.error.OpenAIError as e:

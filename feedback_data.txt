@@ -89,3 +89,4 @@ Query: Do you know how to program?
 Response: Yes, I do.
 Rating: 4
 --------------------------------------------------
+Query: Can you help me code a program?\nResponse: Sure!\nRating: 4\n--------------------------------------------------\nQuery: Can you go to this file location and open it - "C:\Users\timot\Desktop\Python\AutoFix\test.txt"\nResponse: I can't. I don't know how to.\nRating: 3\n--------------------------------------------------\n
