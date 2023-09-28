@@ -68,6 +68,7 @@ def chatbot_response(query: str) -> str:
 
     response = ""  # Initialize the response variable
 
+
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         file_path = query.split('"')[1]
@@ -76,15 +77,31 @@ def chatbot_response(query: str) -> str:
     if code_response := check_code_db(query):
         return code_response
 
-    # Generate response using OpenAI API
-    # ... [Rest of the OpenAI API call]
+    # Generate response using OpenAI API if none of the above conditions are met
+    if not response:
+        full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
+        try:
+            response_obj = openai.Completion.create(
+                engine="davinci",
+                prompt=full_prompt,
+                temperature=0.6,  # Adjusted temperature for more deterministic responses
+                max_tokens=TOKEN_LIMIT,
+                top_p=1,
+                frequency_penalty=0,  # Adjusted frequency penalty for more varied responses
+                presence_penalty=0,  # Adjusted presence penalty for more varied responses
+                stop=["\\n", "User:", "Bot:"]
+            )
+            response = response_obj.choices[0].text.strip()
+        except openai.error.OpenAIError as e:
+            return f"OpenAI Error: {str(e)}"
+        except Exception as e:
+            return f"Error: {str(e)}. I'm having some issues right now. Try again later."
 
     # If the generated response is too similar to the user's query, provide a default response
     if response.strip() == query.strip():
         response = "I'm sorry, I didn't understand that. Can you please rephrase or provide more details?"
-
-
-
+        return response
+    
     # Enhanced File operations
     if any(phrase in query for phrase in ["show files", "list files", "display files"]):
         return list_files()
