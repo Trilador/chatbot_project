@@ -28,10 +28,11 @@ def wolfram_alpha_query(query):
 client = language_v1.LanguageServiceClient()
 
 def analyze_text(text):
-    document = {"content": text, "type": language_v1.Document.Type.PLAIN_TEXT, "language": "en"}
-    analysis = client.analyze_sentiment(document=document)
+    document = language_v1.Document(content=text, type_=language_v1.Document.Type.PLAIN_TEXT, language="en")
+    analysis = client.analyze_sentiment(request={"document": document})
     sentiment = analysis.document_sentiment
     return sentiment.score, sentiment.magnitude
+
 
 def get_dialogflow_response(text, language_code="en"):
     session = session_client.session_path(project_id, session_id)

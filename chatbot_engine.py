@@ -1,9 +1,12 @@
 import openai
 import os
 from typing import List, Union
-from utility_modules.api_integrations import wolfram_alpha_query
+from utility_modules.api_integrations import (
+    wolfram_alpha_query,
+    analyze_text,
+    get_dialogflow_response
+)
 from utility_modules.file_operations import (
-
     list_files,
     list_directories,
     create_directory,
@@ -34,6 +37,7 @@ TOKEN_LIMIT = 150
 # Contextual Understanding
 context: List[str] = []
 CONTEXT_SIZE = 10
+
 
 
 def check_code_db(query: str) -> Union[str, None]:
@@ -94,7 +98,8 @@ def chatbot_response(query: str) -> str:
     context.append(query)
     if len(context) > CONTEXT_SIZE:
         context.pop(0)
-        
+
+
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         return handle_file_reading_request(query)
@@ -144,17 +149,29 @@ def chatbot_response(query: str) -> str:
     elif "search documentation" in query:
         topic = query.split("for")[-1].strip()
         return search_python_documentation(topic)
+    
+    # If no other conditions are met, use Dialogflow for general chatbot interactions
+    if dialogflow_response := get_dialogflow_response(query):
+        return dialogflow_response
 
-    # If no other conditions are met, use OpenAI API
+    # Use Cloud Natural Language API for sentiment analysis
+    sentiment_score, sentiment_magnitude = analyze_text(query)
+    if  sentiment_score > 0.7:
+        return "I'm glad to hear that!"
+    elif sentiment_score < -0.7:
+        return "I'm sorry to hear that. How can I assist you further?"
+
+# If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
     return handle_openai_response(query, context)
 
+
+
 def main() -> None:
-    while True:
-        query = input("You: ")
-        if query.lower() in ["exit", "quit", "bye"]:
-            break
-        response = chatbot_response(query)
-        print(f"Bot: {response}")
+        while True:
+            query = input("You: ")
+            if query.lower() in ["exit", "quit", "bye"]:
+                break
+
 
         # Feedback mechanism
         rating = input("Rate the response (1-5, 5 being very helpful, or 'skip' to skip): ")
@@ -162,6 +179,5 @@ def main() -> None:
             Wstore_feedback(query, response, rating)
         elif rating.lower() != 'skip':
             print("Invalid rating. Skipping feedback for this response.")
-
 if __name__ == "__main__":
     main()
