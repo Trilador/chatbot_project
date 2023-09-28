@@ -73,14 +73,15 @@ def chatbot_response(query: str) -> str:
     context.append(query)
     if len(context) > CONTEXT_SIZE:
         context.pop(0)
-    
+
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         return handle_file_reading_request(query)
-    
+
+    # Check the code database
     if code_response := check_code_db(query):
         return code_response
-    
+
     # Enhanced File operations
     if any(phrase in query for phrase in ["show files", "list files", "display files"]):
         return list_files()
@@ -103,7 +104,7 @@ def chatbot_response(query: str) -> str:
     elif "search content" in query:
         content = query.split("for")[-1].strip()
         return search_file_content(content)
-    
+
     # Enhanced Code generation and analysis
     if "write code" in query or "generate code" in query:
         return natural_language_to_code(query)
@@ -122,38 +123,10 @@ def chatbot_response(query: str) -> str:
     elif "search documentation" in query:
         topic = query.split("for")[-1].strip()
         return search_python_documentation(topic)
+
+    # If no other conditions are met, use OpenAI API
+    return _extracted_from_chatbot_response_52(context, query)
     
-    # Using the entire conversation history for context
-    full_prompt = "\\n".join(context + [f"User: {query}\\nBot:"])
-    try:
-        response = openai.Completion.create(
-            engine="davinci",
-            prompt=full_prompt,
-            temperature=0.7,
-            max_tokens=TOKEN_LIMIT,
-            top_p=1,
-            frequency_penalty=-0.25,
-            presence_penalty=-0.25,
-            stop=["\\n", "User:", "Bot:"]
-        )
-        response_text = response.choices[0].text.strip()
-    except openai.error.OpenAIError as e:
-        return f"OpenAI Error: {str(e)}"
-    except Exception as e:
-        return f"Error: {str(e)}. I'm having some issues right now. Try again later."
-    
-    # Enhanced Response Filtering
-    last_user_query = context[-2] if len(context) > 1 else None
-    last_bot_response = context[-1] if len(context) > 1 else None
-    if response_text == last_bot_response and query == last_user_query:
-        response_text = "I've already provided that response. Can you please rephrase or ask a different question?"
-
-    # Adjusted condition
-    if len(response_text.split()) > TOKEN_LIMIT:
-        response_text = "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
-
-    return response_text
-
 def main() -> None:
     while True:
         query = input("You: ")
