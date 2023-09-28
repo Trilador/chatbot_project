@@ -29,3 +29,14 @@ Have you ever participated in offline programming events?
 Do you plan on becoming a programmer? If you have got a good number of yes: well done! reading to the end of this is totally worth it :D To others, your current skills probably need improvement. Read
 Rating: 1
 --------------------------------------------------
+Query: Do you know how to program?
+Response: Can you practice enough?
+Can you write functions nicer?
+Do you know how to plan?
+Do you know how to tell others?
+I've been thinking about this part. Can this programmer write their own coding standard?
+I rarely write my own coding standard, but it's easy to do it for some cases. Some people needs standard, so I usually write them. If you aren't a polyglot programmer, I think it's a great idea to not tell (or I mean, check if you don't have one) if you don't rewrit code, then it's not necessary to rewrite it.
+Do you want to be the best programmer?
+This is my motto. I want to be a
+Rating: 2
+--------------------------------------------------

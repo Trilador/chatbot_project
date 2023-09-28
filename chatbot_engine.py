@@ -1,9 +1,6 @@
 import openai
-from utility_modules.file_operations import *
-from utility_modules.code_generations import *
 import os
-from typing import List, Tuple, Union, Dict, Any, Generator
-import openai
+from typing import List, Union
 from utility_modules.file_operations import (
     list_files,
     list_directories,
@@ -44,6 +41,7 @@ def chatbot_response(query: str) -> str:
     context.append(query)
     if len(context) > 5:  # Keep the last 5 interactions for context
         context.pop(0)
+
     # File operations
     if "list files" in query:
         return list_files()
@@ -90,14 +88,13 @@ def chatbot_response(query: str) -> str:
 
     else:
         full_prompt = "\n".join(context + [query])
-    response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=TOKEN_LIMIT)
-    response_text = response.choices[0].text.strip()
+        response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=TOKEN_LIMIT)
+        response_text = response.choices[0].text.strip()
 
-    # Adjusted condition
-    if len(response_text.split()) > TOKEN_LIMIT:
-        return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
-    return response_text
-
+        # Adjusted condition
+        if len(response_text.split()) > TOKEN_LIMIT:
+            return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
+        return response_text
 
 def main() -> None:
     while True:
@@ -114,9 +111,5 @@ def main() -> None:
         elif rating.lower() != 'skip':
             print("Invalid rating. Skipping feedback for this response.")
 
-def get_token_limit() -> int:
-    return TOKEN_LIMIT
-
 if __name__ == "__main__":
     main()
-
