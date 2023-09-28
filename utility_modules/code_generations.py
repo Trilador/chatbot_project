@@ -2,6 +2,7 @@ import ast
 import difflib
 import autopep8
 import spacy
+import openai  # Required for OpenAI code generation
 
 nlp = spacy.load("en_core_web_sm")
 
@@ -10,23 +11,45 @@ def get_main_verb_from_query(query):
     doc = nlp(query)
     return next((token for token in doc if "VERB" in token.pos_), None)
 
-def natural_language_to_code(query):
-    # Simple patterns for code generation
-    patterns = {
-        "function to add two numbers": "def add(a, b):\n    return a + b",
-        "function to subtract two numbers": "def subtract(a, b):\n    return a - b",
-        "function to multiply two numbers": "def multiply(a, b):\n    return a * b",
-        "function to divide two numbers": "def divide(a, b):\n    if b != 0:\n        return a / b\n    else:\n        return 'Division by zero error'"
-    }
-    
-    # Check if the query matches any pattern
-    for pattern, code in patterns.items():
-        if pattern in query:
-            return code
-    
-    # If no match is found
-    return "Sorry, I couldn't generate code for that query."
 
+def natural_language_to_code(query: str) -> str:
+    # Extract the main verb from the query to understand the context
+    main_verb = get_main_verb_from_query(query)
+    
+    # Depending on the main verb, refine the query for better code generation
+    if main_verb and main_verb.lemma_ in ["loop", "iterate"]:
+        refined_query = f"Write a Python loop to {query}"
+    elif main_verb and main_verb.lemma_ in ["check", "validate"]:
+        refined_query = f"Write a Python conditional to {query}"
+    else:
+        refined_query = f"Write a Python function to {query}"
+    
+    # Generate code using OpenAI
+    try:
+        response = openai.Completion.create(
+            engine="davinci",
+            prompt=refined_query,
+            temperature=0.7,
+            max_tokens=TOKEN_LIMIT,
+            top_p=1,
+            frequency_penalty=-0.25,
+            presence_penalty=-0.25,
+            stop=["\n", "User:", "Bot:"]
+        )
+        generated_code = response.choices[0].text.strip()
+    except Exception as e:
+        return f"Error generating code: {str(e)}"
+    
+    # Post-process the generated code
+    formatted_code = autopep8.fix_code(generated_code)
+    
+    # Validate the generated code
+    try:
+        ast.parse(formatted_code)
+    except SyntaxError as e:
+        return f"Generated code has a syntax error: {str(e)}"
+    
+    return formatted_code
 
 def generate_loop_code(query):
     if "for" in query:
