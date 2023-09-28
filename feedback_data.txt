@@ -40,3 +40,9 @@ Do you want to be the best programmer?
 This is my motto. I want to be a
 Rating: 2
 --------------------------------------------------
+Query: Can you program?
+Response: Can you code beyond codegens?
+But if not, just do your job
+and beautify my code on my behalf
+Rating: 1
+--------------------------------------------------
