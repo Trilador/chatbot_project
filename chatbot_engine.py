@@ -1,7 +1,9 @@
 import openai
 import os
 from typing import List, Union
+from utility_modules.api_integrations import wolfram_alpha_query
 from utility_modules.file_operations import (
+
     list_files,
     list_directories,
     create_directory,
@@ -33,6 +35,7 @@ TOKEN_LIMIT = 150
 context: List[str] = []
 CONTEXT_SIZE = 10
 
+
 def check_code_db(query: str) -> Union[str, None]:
     return next(
         (
@@ -46,9 +49,11 @@ def check_code_db(query: str) -> Union[str, None]:
         ),
         None,
     )
+
 def handle_file_reading_request(query: str) -> str:
-        file_path = query.split('"')[1]
-        return read_file_content(file_path)
+    file_path = query.split('"')[1]
+    return read_file_content(file_path)
+
 
 def handle_openai_response(query: str, context: List[str]) -> str:
     full_prompt = "\\n".join(context[-4:] + [f"User: {query}\\nBot:"])  # Use the last 4 interactions for context
@@ -82,12 +87,14 @@ def handle_openai_response(query: str, context: List[str]) -> str:
         response_text = "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
 
     return response_text
+        
+
 def chatbot_response(query: str) -> str:
     global context
     context.append(query)
     if len(context) > CONTEXT_SIZE:
         context.pop(0)
-
+        
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         return handle_file_reading_request(query)
@@ -140,7 +147,7 @@ def chatbot_response(query: str) -> str:
 
     # If no other conditions are met, use OpenAI API
     return handle_openai_response(query, context)
-    
+
 def main() -> None:
     while True:
         query = input("You: ")
@@ -152,7 +159,7 @@ def main() -> None:
         # Feedback mechanism
         rating = input("Rate the response (1-5, 5 being very helpful, or 'skip' to skip): ")
         if rating.isdigit() and 1 <= int(rating) <= 5:
-            store_feedback(query, response, rating)
+            Wstore_feedback(query, response, rating)
         elif rating.lower() != 'skip':
             print("Invalid rating. Skipping feedback for this response.")
 
