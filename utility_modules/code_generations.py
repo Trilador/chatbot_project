@@ -11,27 +11,25 @@ def get_main_verb_from_query(query):
     return next((token for token in doc if "VERB" in token.pos_), None)
 
 def natural_language_to_code(query: str) -> str:
-    # Extract the main verb from the query to understand the context
-    main_verb = get_main_verb_from_query(query)
+    # Handle non-code related queries
+    non_code_responses = {
+        "where were you born?": "I am a virtual assistant created by OpenAI. I wasn't born; I was programmed.",
+        "quit": "Goodbye! If you have any more questions, feel free to ask.",
+        # ... [add more non-code responses as needed]
+    }
+    if query.lower() in non_code_responses:
+        return non_code_responses[query.lower()]
 
-    # Refine the query based on the main verb for better code generation
-    refined_query = f"Write Python code for: {query}"
-    if main_verb:
-        verb_actions = {
-            "loop": "Write a Python loop to",
-            "check": "Write a Python conditional to",
-            "function": "Write a Python function to",
-            "import": "Write Python code to"
-        }
-        refined_query = f"{verb_actions.get(main_verb.lemma_, refined_query)} {query}"
-
+    # Preprocess the user's query
+    refined_query = f"Write a Python code snippet to {query}"
+    
     # Generate code using OpenAI
     try:
         response = openai.Completion.create(
             engine="davinci",
             prompt=refined_query,
             temperature=0.7,
-            max_tokens=150,
+            max_tokens=TOKEN_LIMIT,
             top_p=1,
             frequency_penalty=-0.25,
             presence_penalty=-0.25,
@@ -40,14 +38,16 @@ def natural_language_to_code(query: str) -> str:
         generated_code = response.choices[0].text.strip()
     except Exception as e:
         return f"Error generating code: {str(e)}"
-
-    # Post-process and validate the generated code
+    
+    # Post-process the generated code
     formatted_code = autopep8.fix_code(generated_code)
+    
+    # Validate the generated code
     try:
         ast.parse(formatted_code)
     except SyntaxError as e:
         return f"Generated code has a syntax error: {str(e)}"
-
+    
     return formatted_code
 
 def generate_loop_code(query):
