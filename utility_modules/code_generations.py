@@ -26,6 +26,8 @@ def natural_language_to_code(query: str) -> str:
     # Generate code based on intent
     if intent == "code_generation":
         refined_query = f"Write a Python code snippet to {query}"
+    elif intent == "code_explanation":
+        refined_query = f"Explain the following Python code: {query}"
     elif intent == "file_operation":
         refined_query = f"How to perform the file operation: {query} in Python?"
     else:
@@ -57,6 +59,18 @@ def natural_language_to_code(query: str) -> str:
         return f"Generated code has a syntax error: {str(e)}"
     
     return formatted_code
+
+def get_intent(query):
+    # This is a basic intent identification. A more sophisticated approach can be used.
+    if "function" in query or "loop" in query or "list comprehension" in query:
+        return "code_generation"
+    elif "explain" in query or "what does this code do" in query:
+        return "code_explanation"
+    elif "file location" in query or "open" in query or "read" in query:
+        return "file_operation"
+    else:
+        return "general"
+
 
 def get_intent(query):
     # This is a basic intent identification. A more sophisticated approach can be used.
