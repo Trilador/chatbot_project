@@ -1,19 +1,18 @@
+import os
+import openai
 from utility_modules.file_operations import *
 from utility_modules.code_generations import *
-import openai
+from utility_modules.web_operations import fetch_wikipedia_summary
 
-# Configuration Setup:##
 # Set up the OpenAI API
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 if not openai.api_key:
     raise ValueError("Please set the OPENAI_API_KEY environment variable.")
-# Set up the Wikipedia API
-#wiki_wiki = wikipediaapi.Wikipedia('ttriladorr@gmail.com/0.1')
-# Set default directory for access 
+
 DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
 
-
 def chatbot_response(query):
+    # File operations
     if "list files" in query:
         return list_files()
     elif "list directories" in query:
@@ -32,6 +31,7 @@ def chatbot_response(query):
         filename = parts[-2].strip()
         content = parts[-1].strip()
         return save_file_content(filename, content)
+    # Code generation and analysis
     elif "generate code" in query:
         return natural_language_to_code(query)
     elif "provide feedback" in query:
@@ -44,6 +44,9 @@ def chatbot_response(query):
     elif "analyze code" in query:
         code = query.split("for")[-1].strip()
         return analyze_python_code_ast(code)
+    # Wikipedia summary
+    elif "wikipedia summary" in query:
+        return fetch_wikipedia_summary(query)
     else:
         # Forward the query to OpenAI for a natural language response
         response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
