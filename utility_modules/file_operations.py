@@ -88,3 +88,12 @@ def rename_file(old_filename, new_filename, directory=DEFAULT_DIRECTORY):
         return f"Successfully renamed {old_filepath} to {new_filepath}."
     except Exception as e:
         return f"Error renaming {old_filepath}: {str(e)}"
+    
+def search_file_content(content, directory=DEFAULT_DIRECTORY):
+    matching_files = []
+    for root, dirs, files in os.walk(directory):
+        for file in files:
+            with open(os.path.join(root, file), 'r') as f:
+                if content in f.read():
+                    matching_files.append(os.path.join(root, file))
+    return matching_files

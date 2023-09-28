@@ -31,6 +31,10 @@ def chatbot_response(query):
         filename = parts[-2].strip()
         content = parts[-1].strip()
         return save_file_content(filename, content)
+    elif "search content" in query:
+        parts = query.split("for")
+        content = parts[-1].strip()
+        return search_file_content(content)
     # Code generation and analysis
     elif "generate code" in query:
         return natural_language_to_code(query)
