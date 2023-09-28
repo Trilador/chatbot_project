@@ -36,7 +36,7 @@ def chatbot_response(query):
         content = parts[-1].strip()
         return search_file_content(content)
     
-    # Code generation and analysis
+        # Code generation and analysis
     elif "generate code" in query:
         return natural_language_to_code(query)
     elif "provide feedback" in query:
@@ -60,7 +60,12 @@ def chatbot_response(query):
     else:
         # Forward the query to OpenAI for a natural language response
         response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
-        return response.choices[0].text.strip()
+        response_text = response.choices[0].text.strip()
+        
+        # Check if the response is too verbose or unclear
+        if len(response_text.split()) > 50:
+            return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
+        return response_text
 
 def main():
     while True:
