@@ -87,9 +87,8 @@ def chatbot_response(query: str) -> str:
         return _extracted_from_chatbot_response_52(context, query)
 
 def _extracted_from_chatbot_response_52(context, query):
-    # Using only the last user query and bot's response for context
-    limited_context = context[-2:]
-    full_prompt = "\n".join(limited_context + [f"User: {query}\nBot: Please provide a clear and concise answer to the user's query."])
+    # Using the entire conversation history for context
+    full_prompt = "\n".join(context + [f"User: {query}\nBot:"])
     try:
         response = openai.Completion.create(
             engine="davinci",
@@ -114,9 +113,6 @@ def _extracted_from_chatbot_response_52(context, query):
     # Adjusted condition
     if len(response_text.split()) > TOKEN_LIMIT:
         response_text = "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
-
-    # Response Post-Processing to remove repetitive phrases
-    response_text = ' '.join(dict.fromkeys(response_text.split()))
 
     return response_text
 

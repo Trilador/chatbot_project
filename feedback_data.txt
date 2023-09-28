@@ -85,3 +85,7 @@ Query: Where do you retrieve your answer from?
 Response: I use Google search. It's unlikely that I'm going to persuade Mary add the computer family. She needs take lessons and learn how code --- or better yet, get hooked up an answering interpreting service. The only reason has hook down is Mary, humans, have failed meet criteria for using computers. Goodnight everybody!
 Rating: 1
 --------------------------------------------------
+Query: Do you know how to program?
+Response: Yes, I do.
+Rating: 4
+--------------------------------------------------
