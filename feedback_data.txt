@@ -1,0 +1,4 @@
+Query: hey do you remember me now>
+Response: My response seems too long. Would you like a more concise answer or should I clarify something specific?
+Rating: 2
+--------------------------------------------------

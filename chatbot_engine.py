@@ -11,6 +11,9 @@ if not openai.api_key:
 
 DEFAULT_DIRECTORY = "C:\\Users\\timot\\Desktop\\Python\\AutoFix"
 
+# Contextual Understanding
+context = []
+
 def store_feedback(query, response, rating):
     with open("feedback_data.txt", "a") as f:
         f.write(f"Query: {query}\n")
@@ -18,7 +21,37 @@ def store_feedback(query, response, rating):
         f.write(f"Rating: {rating}\n")
         f.write("-" * 50 + "\n")
 
+
+def natural_language_to_code(query):
+    # Basic templates for common tasks
+    templates = {
+        "read file": "with open('filename.txt', 'r') as file:\n    content = file.read()",
+        "write file": "with open('filename.txt', 'w') as file:\n    file.write('content')",
+        "basic loop": "for i in range(10):\n    print(i)"
+    }
+    
+    # Check if the query matches any template
+    for task, code in templates.items():
+        if task in query:
+            return code
+    
+    # If no template matches, ask for more details
+    return "Can you provide more details or specify the task you want to perform?"
+
+def get_token_limit(query):
+    """Dynamically adjust the token limit based on the query's complexity."""
+    if len(query.split()) < 5:
+        return 50
+    elif len(query.split()) < 10:
+        return 100
+    else:
+        return 150
+
 def chatbot_response(query):
+    global context
+    context.append(query)
+    if len(context) > 5:  # Keep the last 5 interactions for context
+        context.pop(0):
     # File operations
     if "list files" in query:
         return list_files()
@@ -69,10 +102,20 @@ def chatbot_response(query):
         response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=150)
         response_text = response.choices[0].text.strip()
         
-        # Check if the response is too verbose or unclear
-        if len(response_text.split()) > 50:
-            return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
-        return response_text
+        token_limit = get_token_limit(query)
+    response = openai.Completion.create(engine="davinci", prompt=query, max_tokens=token_limit)
+    response_text = response.choices[0].text.strip()
+    
+# Forward the query to OpenAI with context
+    full_prompt = "\n".join(context + [query])
+    token_limit = get_token_limit(full_prompt)
+    response = openai.Completion.create(engine="davinci", prompt=full_prompt, max_tokens=token_limit)
+    response_text = response.choices[0].text.strip()
+    
+    # Check if the response is too verbose or unclear
+    if len(response_text.split()) > (token_limit // 3):
+        return "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
+    return response_text
 
 def main():
     while True:
