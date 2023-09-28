@@ -66,6 +66,8 @@ def chatbot_response(query: str) -> str:
     if len(context) > 5:  # Keep the last 5 interactions for context
         context.pop(0)
 
+    response = ""  # Initialize the response variable
+
     # Check for file reading requests
     if "C:\\" in query and ("read" in query or "open" in query or "type out" in query):
         file_path = query.split('"')[1]
