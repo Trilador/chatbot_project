@@ -1,0 +1,4 @@
+Query: Hello there can you help me out?
+Response: I'm sorry to hear that. How can I assist you further?
+Rating: 1
+

@@ -11,19 +11,15 @@ def get_main_verb_from_query(query):
     return next((token for token in doc if "VERB" in token.pos_), None)
 
 def natural_language_to_code(query: str) -> str:
-    # Handle non-code related queries
     non_code_responses = {
         "where were you born?": "I am a virtual assistant created by OpenAI. I wasn't born; I was programmed.",
         "quit": "Goodbye! If you have any more questions, feel free to ask.",
-        # ... [add more non-code responses as needed]
     }
     if query.lower() in non_code_responses:
         return non_code_responses[query.lower()]
 
-    # Identify the intent of the query
     intent = get_intent(query)
     
-    # Generate code based on intent
     if intent == "code_generation":
         refined_query = f"Write a Python code snippet to {query}"
     elif intent == "code_explanation":
@@ -33,7 +29,6 @@ def natural_language_to_code(query: str) -> str:
     else:
         refined_query = query
     
-    # Generate code using OpenAI
     try:
         response = openai.Completion.create(
             engine="davinci",
@@ -49,10 +44,8 @@ def natural_language_to_code(query: str) -> str:
     except Exception as e:
         return f"Error generating code: {str(e)}"
     
-    # Post-process the generated code
     formatted_code = autopep8.fix_code(generated_code)
     
-    # Validate the generated code
     try:
         ast.parse(formatted_code)
     except SyntaxError as e:
@@ -61,7 +54,6 @@ def natural_language_to_code(query: str) -> str:
     return formatted_code
 
 def get_intent(query):
-    # This is a basic intent identification. A more sophisticated approach can be used.
     if "function" in query or "loop" in query or "list comprehension" in query:
         return "code_generation"
     elif "explain" in query or "what does this code do" in query:
@@ -70,17 +62,6 @@ def get_intent(query):
         return "file_operation"
     else:
         return "general"
-
-
-def get_intent(query):
-    # This is a basic intent identification. A more sophisticated approach can be used.
-    if "function" in query or "loop" in query or "list comprehension" in query:
-        return "code_generation"
-    elif "file location" in query or "open" in query or "read" in query:
-        return "file_operation"
-    else:
-        return "general"
-
 
 def generate_loop_code(query):
     if "for" in query:

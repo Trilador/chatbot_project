@@ -1,3 +1,4 @@
+test*.py
 import openai
 import os
 from typing import List, Union
@@ -50,6 +51,12 @@ def update_context(user_query: str, bot_response: str) -> None:
     while len(context) > CONTEXT_SIZE:
         context.pop(0)
 
+def get_recent_context() -> str:
+    """
+    Retrieve the recent context for better understanding.
+    """
+    return "\n".join(context[-4:])
+
 def check_code_db(query: str) -> Union[str, None]:
     return next(
         (
@@ -70,7 +77,8 @@ def handle_file_reading_request(query: str) -> str:
 
 
 def handle_openai_response(query: str, context: List[str]) -> str:
-    full_prompt = "\\n".join(context[-4:] + [f"User: {query}\\nBot:"])  # Use the last 4 interactions for context
+    # Use the last 4 interactions for context
+    full_prompt = "\n".join(context[-4:] + [f"User: {query}", "Bot:"])
     try:
         response = openai.Completion.create(
             engine="davinci",
@@ -84,9 +92,11 @@ def handle_openai_response(query: str, context: List[str]) -> str:
         )
         response_text = response.choices[0].text.strip()
     except openai.error.OpenAIError as e:
+        if "Input text not set." in str(e):
+            return "OpenAI Error: It seems there was an issue with the input provided to OpenAI."
         return f"OpenAI Error: {str(e)}"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error with OpenAI response: {str(e)}"
 
     # Enhanced Response Filtering
     last_user_query = context[-2] if len(context) > 1 else None
@@ -101,7 +111,6 @@ def handle_openai_response(query: str, context: List[str]) -> str:
         response_text = "My response seems too long. Would you like a more concise answer or should I clarify something specific?"
 
     return response_text
-        
 
 def chatbot_response(query: str) -> str:
     if not query.strip():
@@ -132,32 +141,7 @@ def chatbot_response(query: str) -> str:
     except Exception as e:
         return f"Error analyzing sentiment: {str(e)}"
 
-    #If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
-    
-def handle_openai_response(query: str, context: List[str]) -> str:
-    # ... [Previous logic]
-        except openai.error.OpenAIError as e:
-        if "Input text not set." in str(e):
-                return "OpenAI Error: It seems there was an issue with the input provided to OpenAI. Please try again."
-            return f"OpenAI Error: {str(e)}"
-    except Exception as e: f"Error with OpenAI response: {str(e)}"
+    # If neither Dialogflow nor sentiment analysis provides a clear response, use OpenAI API
+    return handle_openai_response(query, get_recent_context())
 
 
-
-def main() -> None:
-    while True:
-        query = input("You: ")
-        if query.lower() in ["exit", "quit", "bye"]:
-            break
-        response = chatbot_response(query)
-        print(f"Bot: {response}")
-        
-        # Feedback mechanism
-        rating = input("Rate the response (1-5, 5 being very helpful, or 'skip' to skip): ")
-        if rating.isdigit() and 1 <= int(rating) <= 5:
-            store_feedback(query, response, rating)
-        elif rating.lower() != 'skip':
-            print("Invalid rating. Skipping feedback for this response.")
-
-if __name__ == "__main__":
-    main()

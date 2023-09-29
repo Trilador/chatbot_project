@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"name": "chatbot_project",
+			"path": "."
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"dialogflow",
+			"openai"
+		]
+	},
+	"extensions": {
+		"recommendations": [
+			"danielsanmedium.dscodegpt"
+		]
+	}
+}

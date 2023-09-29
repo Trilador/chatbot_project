@@ -1,0 +1,76 @@
+# wikipedia_scraper.py
+
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse
+
+def extract_wikipedia_content(url, language='en', section=None, extract_images=False, extract_links=False):
+    """
+    Extracts the main content from a Wikipedia page.
+
+    Args:
+    - url (str): The URL of the Wikipedia page.
+    - language (str): The language of the Wikipedia page. Defaults to 'en'.
+    - section (str): The section of the Wikipedia page to extract. Defaults to None (i.e. the entire page).
+    - extract_images (bool): Whether to extract images from the Wikipedia page. Defaults to False.
+    - extract_links (bool): Whether to extract links from the Wikipedia page. Defaults to False.
+
+    Returns:
+    - str: The extracted content.
+    """
+    # Validate input URL
+    parsed_url = urlparse(url)
+    if parsed_url.netloc != f"{language}.wikipedia.org" or not parsed_url.path.startswith("/wiki/"):
+        print("Error: Invalid Wikipedia page URL.")
+        return None
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        soup = BeautifulSoup(response.content, 'lxml')
+
+        # Wikipedia content is typically inside <p> tags under the 'mw-parser-output' class
+        content_div = soup.find('div', class_='mw-parser-output')
+        if content_div is None:
+            print("Error: No content found on the page.")
+            return None
+
+        if section:
+            section_heading = soup.find('span', id=section)
+            if section_heading is None:
+                print(f"Error: Section '{section}' not found on the page.")
+                return None
+            section_content = section_heading.parent.find_next_sibling('div', class_='mw-parser-output')
+            if section_content is None:
+                print(f"Error: No content found for section '{section}'.")
+                return None
+            paragraphs = section_content.find_all('p')
+        else:
+            paragraphs = content_div.find_all('p')
+
+        # Extract text from each paragraph and join them
+        content = "\n".join(p.get_text() for p in paragraphs)
+
+        if extract_images:
+            images = content_div.find_all('img')
+            image_urls = [img['src'] for img in images]
+            content += "\n\n" + "\n".join(image_urls)
+
+        if extract_links:
+            links = content_div.find_all('a')
+            link_urls = [link['href'] for link in links]
+            content += "\n\n" + "\n".join(link_urls)
+
+        return content
+
+    except requests.RequestException as e:
+        print(f"Error fetching Wikipedia content: {e}")
+        return None
+
+if __name__ == "__main__":
+    # Test the function
+    url = "https://fr.wikipedia.org/wiki/OpenAI"
+    content = extract_wikipedia_content(url, language='fr', section='Historique', extract_images=True, extract_links=True)
+    if content:
+        print(content[:1000])  # Print the first 1000 characters for testing
