@@ -56,3 +56,27 @@ class CommandHandler:
 
     def search_file_content(self, search_term: str) -> str:
         return search_file_content(search_term)
+    def handle_command(self, command):
+        """
+        Handle the given command and return an appropriate response.
+
+        Args:
+        - command (str): The user's command.
+
+        Returns:
+        - str: The response to the command.
+        """
+        handler = self.commands.get(command)
+        if handler:
+            return handler()
+        else:
+            return f"Unknown command: {command}"
+
+    def _help_command(self):
+        return "Available commands: help, version, exit"
+
+    def _version_command(self):
+        return "Chatbot version 1.0"
+
+    def _exit_command(self):
+        return "Exiting chatbot. Goodbye!"
